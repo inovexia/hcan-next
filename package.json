@@ -12,6 +12,7 @@
     "@builder.io/dev-tools": "^1.11.44",
     "@builder.io/react": "^8.2.7",
     "@builder.io/sdk": "^6.1.2",
+    "@netlify/next": "^1.4.9",
     "bootstrap": "^5.3.8",
     "bootstrap-icons": "^1.13.1",
     "next": "15.5.3",
