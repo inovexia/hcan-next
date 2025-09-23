@@ -1,5 +1,5 @@
 export const revalidate = 60;
-export const dynamic = 'force-dynamic'; // or 'force-dynamic' if needed
+export const dynamic = 'force-static'; // or 'force-dynamic' if needed
 
 export async function generateStaticParams() {
   try {
