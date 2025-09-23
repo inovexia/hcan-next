@@ -30,7 +30,15 @@ export default function CatchAllPage() {
   }, [pathname]);
 
   if (loading) return <Loader />;
-  if (!content) return <div>Page not found</div>;
+  if (!content) {
+    return (
+      <div className='d-flex justify-content-center align-items-center vh-100 flex-column text-center bg-light'>
+        <h2 className='mb-2'>Page Not Found</h2>
+        <p>This Builder.io page doesn’t exist or failed to load.</p>
+      </div>
+    );
+  }
+
 
   return <BuilderComponent model='page' content={content} />;
 }
