@@ -1,5 +1,3 @@
-export const revalidate = 60;
-export const dynamic = 'force-static';
 
 export async function generateStaticParams() {
   try {
@@ -7,7 +5,7 @@ export async function generateStaticParams() {
       `https://cdn.builder.io/api/v1/pages?apiKey=${process.env.NEXT_PUBLIC_BUILDER_API_KEY}`
     );
     if (!res.ok || res.headers.get('content-type')?.includes('text/html')) {
-      console.warn('Builder.io API returned HTML or error page');
+      console.warn('Builder.io returned HTML or error');
       return [];
     }
 
@@ -20,3 +18,4 @@ export async function generateStaticParams() {
     return [];
   }
 }
+
