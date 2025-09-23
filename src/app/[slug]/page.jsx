@@ -1,21 +1,19 @@
+export const revalidate = 60;
+export const dynamic = 'force-static';
+export default async function Page({ params }) {
+  const slug = params?.slug || 'home';
 
-export async function generateStaticParams() {
-  try {
-    const res = await fetch(
-      `https://cdn.builder.io/api/v1/pages?apiKey=${process.env.NEXT_PUBLIC_BUILDER_API_KEY}`
+  const res = await fetch(
+    `https://cdn.builder.io/api/v1/page/${slug}?apiKey=${process.env.NEXT_PUBLIC_BUILDER_API_KEY}`
+  );
+  const builderContent = await res.json();
+  if (!builderContent || !builderContent.data) {
+    return (
+      <div style={{ padding: '2rem', textAlign: 'center' }}>
+        Page not found or content missing.
+      </div>
     );
-    if (!res.ok || res.headers.get('content-type')?.includes('text/html')) {
-      console.warn('Builder.io returned HTML or error');
-      return [];
-    }
-
-    const json = await res.json();
-    return json.map((page) => ({
-      slug: page.data?.url?.replace('/', '') || 'home',
-    }));
-  } catch (err) {
-    console.error('Error in generateStaticParams:', err);
-    return [];
   }
-}
 
+  return <BuilderComponent content={builderContent} model='page' />;
+}
