@@ -1,11 +1,13 @@
+export const revalidate = 60;
+export const dynamic = 'force-static';
 
 export async function generateStaticParams() {
   try {
     const res = await fetch(
-      'https://cdn.builder.io/api/v1/pages?apiKey=f05495fc44c140dcb534bf29c4f1e9db'
+      `https://cdn.builder.io/api/v1/pages?apiKey=${process.env.NEXT_PUBLIC_BUILDER_API_KEY}`
     );
-    if (!res.ok) {
-      console.error('Failed to fetch Builder.io pages:', res.statusText);
+    if (!res.ok || res.headers.get('content-type')?.includes('text/html')) {
+      console.warn('Builder.io API returned HTML or error page');
       return [];
     }
 
@@ -18,4 +20,3 @@ export async function generateStaticParams() {
     return [];
   }
 }
-
