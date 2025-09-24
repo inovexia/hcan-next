@@ -2,9 +2,9 @@
 import { builder, Builder } from "@builder.io/react";
 import Counter from "./components/Counter/Counter";
 import Loader from "./components/Loader";
-import Page from "./app/[...page]/pageOriginal";
+import Page from "./app/[...builder]/page";
 import ProductGrid from "./components/ProductGrid";
-import ProductPage from "./app/product/[id]/pageOld";
+import ProductPage from "./app/product/[id]/page";
 
 builder.init(process.env.NEXT_PUBLIC_BUILDER_API_KEY);
 

@@ -45,3 +45,20 @@
   padding: 10px 30px;
   margin-top: 30px;
 }
+.pdt-tab-section .tab-header{
+  background-color:#151515;
+  padding:20px 10px;
+}
+.pdt-tab-section .tab-data p{
+  color:#fff;
+  font-size:16px;
+  text-align:center;
+  font-weight:600;
+  text-transform:uppercase;
+}
+.pdt-tab-section .about-product p{
+  color:#000000;
+  font-size:16px;
+  text-align:justify;
+  margin-top:20px;
+}
