@@ -1,5 +1,7 @@
 'use client';
 import React from 'react';
+import { useEffect, useState } from 'react';
+import { builder, BuilderComponent } from '@builder.io/react';
 import { Container, Row, Col, Card, CardBody, Button } from 'reactstrap';
 import { useParams } from 'next/navigation';
 import ProductSlider from '../../../components/Product/ProductSlider';
@@ -175,19 +177,32 @@ export default function ProductPage() {
   const params = useParams();
   const productId = parseInt(params.id);
   const product = products.find((p) => p.id === productId);
- 
+  const [headerMain, setHeaderMain] = useState(null);
+  const [footerMain, setFooterMain] = useState(null);
+useEffect(() => {
+  builder.get('symbol', { name: 'my-header' }).toPromise().then(setHeaderMain);
+}, []);
+useEffect(() => {
+  builder.get('symbol', { name: 'footer' }).toPromise().then(setFooterMain);
+}, []);
+
 
   if (!product) {
     return (
-      <Container className='py-5'>
-        <h2>Product not found</h2>
-        <p>No product exists with ID: {params.id}</p>
-      </Container>
+      <>
+        {headerMain && <BuilderComponent model='symbol' content={headerMain} />}
+        <Container className='py-5'>
+          <h2>Product not found</h2>
+          <p>No product exists with ID: {params.id}</p>
+        </Container>
+  
+      </>
     );
   }
 
   return (
     <>
+      {headerMain && <BuilderComponent model='symbol' content={headerMain} />}
       <Container fluid className='pdt-container'>
         <Row>
           <Col md={6}>
@@ -211,6 +226,7 @@ export default function ProductPage() {
         </Row>
       </Container>
       <TabSection product={product} />
+
     </>
   );
 }
