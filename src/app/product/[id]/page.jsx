@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { builder, BuilderComponent } from '@builder.io/react';
 import { Container, Row, Col, Card, CardBody, Button } from 'reactstrap';
 import { useParams } from 'next/navigation';
+import Loader from '../../../components/Loader';
 import ProductSlider from '../../../components/Product/ProductSlider';
 import TabSection from '../../../components/Product/TabSection';
 import StarRating from '../../../components/Product/StarRating';
@@ -176,33 +177,54 @@ const products = [
 export default function ProductPage() {
   const params = useParams();
   const productId = parseInt(params.id);
+   const [loading, setLoading] = useState(true);
   const product = products.find((p) => p.id === productId);
-  const [headerMain, setHeaderMain] = useState(null);
-  const [footerMain, setFooterMain] = useState(null);
-useEffect(() => {
-  builder.get('symbol', { name: 'my-header' }).toPromise().then(setHeaderMain);
-}, []);
-useEffect(() => {
-  builder.get('symbol', { name: 'footer' }).toPromise().then(setFooterMain);
-}, []);
+  const [symbols, setSymbols] = useState([]);
 
 
+   useEffect(() => {
+     async function fetchSymbols() {
+       const allSymbols = await builder.getAll('symbol', {
+         fields: 'id,name,data',
+         options: { noTargeting: true },
+       });
+       setSymbols(allSymbols);
+       setLoading(false);
+     }
+     fetchSymbols();
+   }, []);
+
+ if (loading) {
+   return <Loader />;
+ }
   if (!product) {
     return (
       <>
-        {headerMain && <BuilderComponent model='symbol' content={headerMain} />}
+        {symbols
+          .filter((s) => s.name === 'Header')
+          .map((symbol) => (
+            <BuilderComponent key={symbol.id} model='symbol' content={symbol} />
+          ))}
         <Container className='py-5'>
           <h2>Product not found</h2>
           <p>No product exists with ID: {params.id}</p>
         </Container>
-  
+        {symbols
+          .filter((s) => s.name === 'footer')
+          .map((symbol) => (
+            <BuilderComponent key={symbol.id} model='symbol' content={symbol} />
+          ))}
       </>
     );
   }
 
   return (
     <>
-      {headerMain && <BuilderComponent model='symbol' content={headerMain} />}
+      {symbols
+        .filter((s) => s.name === 'Header')
+        .map((symbol) => (
+          <BuilderComponent key={symbol.id} model='symbol' content={symbol} />
+        ))}
       <Container fluid className='pdt-container'>
         <Row>
           <Col md={6}>
@@ -226,7 +248,11 @@ useEffect(() => {
         </Row>
       </Container>
       <TabSection product={product} />
-
+      {symbols
+        .filter((s) => s.name === 'footer')
+        .map((symbol) => (
+          <BuilderComponent key={symbol.id} model='symbol' content={symbol} />
+        ))}
     </>
   );
 }
