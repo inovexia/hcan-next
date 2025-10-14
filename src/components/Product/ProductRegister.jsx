@@ -1,17 +1,18 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { Container, Row, Col, Card, CardBody, Button } from 'reactstrap';
+import { Container, Row, Col } from 'reactstrap';
+import Loader from '../../components/Loader';
 
 export default function ProductRegister() {
   const [form, setForm] = useState(null);
   const [formData, setFormData] = useState({});
   const [status, setStatus] = useState(null);
-
-  // Load form fields from Statamic API
+  const [loading, setLoading] = useState(true);
   useEffect(() => {
     fetch('https://hcan.dev.developer1.website/api/forms/product_registration')
       .then((res) => res.json())
       .then((data) => setForm(data.data))
+      .then(() => setLoading(false))
       .catch(() => setStatus('Failed to load form'));
   }, []);
 
@@ -40,8 +41,36 @@ export default function ProductRegister() {
     }
   };
 
-  if (!form) return <p>Loading form...</p>;
+  if (loading) return <Loader />; 
+  const evaluateCondition = (conditionObj) => {
+    if (!conditionObj) return true;
+    return Object.entries(conditionObj).every(([depField, rule]) => {
+      if (!rule) return true;
 
+      const [operator, ...expectedParts] = rule.split(' ');
+      const expectedValue = expectedParts.join(' ').trim().toLowerCase();
+      const actualValue = (formData[depField] || '')
+        .toString()
+        .toLowerCase()
+        .trim();
+
+      switch (operator) {
+        case 'equals':
+        case 'is':
+          return actualValue === expectedValue;
+        case 'not':
+        case '!=':
+          return actualValue !== expectedValue;
+        case 'in': 
+          return expectedValue
+            .split(',')
+            .map((v) => v.trim())
+            .includes(actualValue);
+        default:
+          return true;
+      }
+    });
+  };
   return (
     <Container className='w-100 py-5 border rounded-xl shadow'>
       <form
@@ -51,19 +80,8 @@ export default function ProductRegister() {
       >
         <Row className='pdt-register-form d-flex flex-wrap m-auto w-100 gx-4'>
           {Object.values(form.fields || {}).map((field) => {
-        
-            if (field.if) {
-              const [depField, condition] = Object.entries(field.if)[0]; 
-              const [operator, expectedValue] = condition.split(' ');
-              const actualValue = formData[depField];
-
-              if (operator === 'equals' && actualValue !== expectedValue) {
-                return null;
-              }
-            }
-            let style = {};
+            if (!evaluateCondition(field.if)) return null;
             const colSize = field.width === 50 ? 6 : 12;
-
             return (
               <Col md={colSize} key={field.handle} className='mb-4'>
                 <label className='block mb-1 font-medium'>
@@ -93,8 +111,11 @@ export default function ProductRegister() {
                       {field.placeholder || 'Select an option'}
                     </option>
                     {field.options?.map((opt) => (
-                      <option key={opt.key || opt.value} value={opt.value}>
-                        {opt.value}
+                      <option
+                        key={opt.key || opt.value}
+                        value={opt.key || opt.value}
+                      >
+                        {opt.value || opt.label || opt.key}
                       </option>
                     ))}
                   </select>
@@ -172,7 +193,9 @@ export default function ProductRegister() {
           })}
           <button
             type='submit'
-            className='d-inline-block w-auto bg-transparent border-0 border-bottom border-black mx-auto' style={{fontSize:26}}> 
+            className='d-inline-block w-auto bg-transparent border-0 border-bottom border-black mx-auto'
+            style={{ fontSize: 26 }}
+          >
             REGISTER
           </button>
         </Row>
