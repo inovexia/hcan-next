@@ -13,23 +13,32 @@ export default function BuilderCatchAllPage() {
   const [content, setContent] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    builder
-      .get('page', { url: path })
-      .toPromise()
-      .then((res) => {
-        setContent(res);
-        setLoading(false);
-      });
-  }, [path]);
+useEffect(() => {
+  async function fetchContent() {
+    setLoading(true);
+    try {
+      const contentRes = await builder
+        .get('page', {
+          url: path, 
+          cachebust: true, 
+        })
+        .toPromise();
 
-  if (loading) return <Loader />; 
+      console.log('Builder fetching path:', path);
+      console.log('Builder response:', contentRes);
+console.log('➡️ Builder route matched for path:', path);
 
+      setContent(contentRes);
+    } catch (err) {
+      console.error('Builder fetch error:', err);
+    } finally {
+      setLoading(false);
+    }
+  }
+  fetchContent();
+}, [path])
+
+  if (loading) return <Loader />;
   if (!content) return <div>Page not found</div>;
-
-  return (
-    <div>
-      <BuilderComponent model='page' content={content} />
-    </div>
-  );
+  return <BuilderComponent model='page' content={content} />;
 }
