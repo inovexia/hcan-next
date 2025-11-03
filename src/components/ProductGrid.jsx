@@ -7,9 +7,11 @@ export default function ProductGrid({ heading = 'All Products' }) {
 
   useEffect(() => {
     async function fetchProducts() {
-      const res = await fetch('https://dummyjson.com/products');
+      const res = await fetch(
+        'https://hcan.dev.developer1.website/api/collections/products/entries'
+      );
       const data = await res.json();
-      setProducts(data.products);
+      setProducts(data.data);
     }
 
     fetchProducts();
@@ -30,13 +32,15 @@ export default function ProductGrid({ heading = 'All Products' }) {
             key={product.id}
             style={{ border: '1px solid #ccc', padding: '1rem' }}
           >
-            <img
-              src={product.thumbnail}
-              alt={product.title}
-              style={{ width: '100%' }}
-            />
+            {product.featured_image && (
+              <img
+                src={product.featured_image}
+                alt={product.title}
+                style={{ width: '100%' }}
+              />
+            )}
             <h3>{product.title}</h3>
-            <p>${product.price}</p>
+            {product.price && <p>${product.price}</p>}
           </div>
         ))}
       </div>

@@ -20,26 +20,67 @@ export default function ProductRegister() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();
+  //   setStatus('Submitting...');
+
+  //   const response = await fetch(
+  //     'https://hcan.dev.developer1.website!/forms/product_registration/submit',
+  //     {
+  //       method: 'POST',
+  //       headers: { 'Content-Type': 'application/json' },
+  //       body: JSON.stringify(formData),
+  //     }
+  //   );
+
+  //   if (response.ok) {
+  //     setStatus('Thank you! Your product has been registered.');
+  //     setFormData({});
+  //   } else {
+  //     setStatus('Submission failed, please try again.');
+  //   }
+  // };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setStatus('Submitting...');
 
-    const response = await fetch(
-      'https://hcan.dev.developer1.website!/forms/product_registration/submit',
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      }
-    );
+    try {
+      let formPayload;
+      const hasFile = Object.values(formData).some((v) => v instanceof File);
 
-    if (response.ok) {
-      setStatus('Thank you! Your product has been registered.');
-      setFormData({});
-    } else {
-      setStatus('Submission failed, please try again.');
+      if (hasFile) {
+        formPayload = new FormData();
+        Object.entries(formData).forEach(([key, value]) => {
+          formPayload.append(key, value);
+        });
+      } else {
+        formPayload = JSON.stringify(formData);
+      }
+      const apiUrl = 'https://jsonplaceholder.typicode.com/posts';
+
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: hasFile ? {} : { 'Content-Type': 'application/json' },
+        body: formPayload,
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        console.log('Dummy API Response:', result);
+        setStatus(
+          'Thank you! Your product has been registered (dummy API).'
+        );
+        setFormData({});
+      } else {
+        setStatus('Submission failed. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      setStatus('An error occurred during submission.');
     }
   };
+
 
   if (loading) return <Loader />; 
   const evaluateCondition = (conditionObj) => {
