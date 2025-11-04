@@ -20,8 +20,7 @@ export default function ProductPage() {
         setLoading(true);
 
         const res = await fetch(
-          'https://hcan.dev.developer1.website/api/collections/products/entries',
-          { cache: 'no-store' }
+          'https://hcan.dev.developer1.website/api/collections/products/entries'
         );
 
         if (!res.ok) throw new Error('Failed to fetch products');
@@ -101,8 +100,12 @@ export default function ProductPage() {
         <Row>
           <Col md={6}>
             <ProductSlider
-              thumbnail={sanitizedProduct?.thumbnail}
-              images={sanitizedProduct?.images || []}
+              thumbnail={sanitizedProduct?.product_main_image.permalink}
+              images={
+                sanitizedProduct?.product_images
+                  ?.slice(1)
+                  .map((img) => img.permalink) || []
+              }
             />
           </Col>
 

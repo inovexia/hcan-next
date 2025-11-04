@@ -10,7 +10,6 @@ export default function ProductsPage() {
 
   useEffect(() => {
     async function fetchBuilderPage() {
-      // ✅ Make sure to include the URL for targeting
       const res = await builder.get('products-page', {
         url: '/products',
         cachebust: true,
@@ -22,7 +21,6 @@ export default function ProductsPage() {
     fetchBuilderPage();
   }, []);
 
-  // ✅ Show fallback if Builder returns no data
   if (!page) return <div>Loading...</div>;
 
   return <BuilderComponent model="products-page" content={page} />;

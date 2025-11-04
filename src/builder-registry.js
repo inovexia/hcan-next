@@ -6,6 +6,7 @@ import Page from "./app/[...builder]/page";
 import ProductGrid from "./components/ProductGrid";
 import ProductPage from "./app/product/[slug]/page";
 import ProductRegister from "./components/Product/ProductRegister";
+import StatamicProduct from "./components/StatamicProduct";
 
 builder.init(process.env.NEXT_PUBLIC_BUILDER_API_KEY);
 
@@ -46,4 +47,8 @@ Builder.registerComponent(ProductPage, {
 
 Builder.registerComponent(ProductRegister, {
   name: "ProductRegister",
+});
+
+Builder.registerComponent(StatamicProduct, {
+  name: "StatamicProduct",
 });
