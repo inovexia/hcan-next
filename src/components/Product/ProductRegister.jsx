@@ -20,66 +20,66 @@ export default function ProductRegister() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // const handleSubmit = async (e) => {
-  //   e.preventDefault();
-  //   setStatus('Submitting...');
-
-  //   const response = await fetch(
-  //     'https://hcan.dev.developer1.website!/forms/product_registration/submit',
-  //     {
-  //       method: 'POST',
-  //       headers: { 'Content-Type': 'application/json' },
-  //       body: JSON.stringify(formData),
-  //     }
-  //   );
-
-  //   if (response.ok) {
-  //     setStatus('Thank you! Your product has been registered.');
-  //     setFormData({});
-  //   } else {
-  //     setStatus('Submission failed, please try again.');
-  //   }
-  // };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setStatus('Submitting...');
 
-    try {
-      let formPayload;
-      const hasFile = Object.values(formData).some((v) => v instanceof File);
-
-      if (hasFile) {
-        formPayload = new FormData();
-        Object.entries(formData).forEach(([key, value]) => {
-          formPayload.append(key, value);
-        });
-      } else {
-        formPayload = JSON.stringify(formData);
-      }
-      const apiUrl = 'https://jsonplaceholder.typicode.com/posts';
-
-      const response = await fetch(apiUrl, {
+    const response = await fetch(
+      'https://hcan.dev.developer1.website/forms/product_registration/submit',
+      {
         method: 'POST',
-        headers: hasFile ? {} : { 'Content-Type': 'application/json' },
-        body: formPayload,
-      });
-
-      if (response.ok) {
-        const result = await response.json();
-        console.log('Dummy API Response:', result);
-        setStatus(
-          'Thank you! Your product has been registered (dummy API).'
-        );
-        setFormData({});
-      } else {
-        setStatus('Submission failed. Please try again.');
+        headers: { 'Content-Type': 'application/json' },
+        body:formData,
       }
-    } catch (error) {
-      console.error('Error:', error);
-      setStatus('An error occurred during submission.');
+    );
+
+    if (response.ok) {
+      setStatus('Thank you! Your product has been registered.');
+      setFormData({});
+    } else {
+      setStatus('Submission failed, please try again.');
     }
   };
+
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();
+  //   setStatus('Submitting...');
+
+  //   try {
+  //     let formPayload;
+  //     const hasFile = Object.values(formData).some((v) => v instanceof File);
+
+  //     if (hasFile) {
+  //       formPayload = new FormData();
+  //       Object.entries(formData).forEach(([key, value]) => {
+  //         formPayload.append(key, value);
+  //       });
+  //     } else {
+  //       formPayload = JSON.stringify(formData);
+  //     }
+  //     const apiUrl = 'https://jsonplaceholder.typicode.com/posts';
+
+  //     const response = await fetch(apiUrl, {
+  //       method: 'POST',
+  //       headers: hasFile ? {} : { 'Content-Type': 'application/json' },
+  //       body: formPayload,
+  //     });
+
+  //     if (response.ok) {
+  //       const result = await response.json();
+  //       console.log('Dummy API Response:', result);
+  //       setStatus(
+  //         'Thank you! Your product has been registered (dummy API).'
+  //       );
+  //       setFormData({});
+  //     } else {
+  //       setStatus('Submission failed. Please try again.');
+  //     }
+  //   } catch (error) {
+  //     console.error('Error:', error);
+  //     setStatus('An error occurred during submission.');
+  //   }
+  // };
 
 
   if (loading) return <Loader />; 
@@ -119,6 +119,7 @@ export default function ProductRegister() {
         className='mx-auto p-6'
         style={{ width: '90%' }}
       >
+        <input type="hidden" name="_token" value="cN03woeRj5Q0GtlOj7GydsZcRwlyp9VLzfpwDFJZ"/>
         <Row className='pdt-register-form d-flex flex-wrap m-auto w-100 gx-4'>
           {Object.values(form.fields || {}).map((field) => {
             if (!evaluateCondition(field.if)) return null;
