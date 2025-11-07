@@ -1,153 +1,121 @@
 'use client';
-import React, { useEffect, useState } from 'react';
-import { useParams } from 'next/navigation';
 import { builder, BuilderComponent } from '@builder.io/react';
-import { Container, Row, Col, Card, CardBody } from 'reactstrap';
+import { useEffect, useState } from 'react';
+import { useParams } from 'next/navigation';
+import { Container } from 'reactstrap';
 import Loader from '../../../components/Loader';
 import ProductSlider from '../../../components/Product/ProductSlider';
-import TabSection from '../../../components/Product/TabSection';
-import StarRating from '../../../components/Product/StarRating';
+
+builder.init(process.env.NEXT_PUBLIC_BUILDER_API_KEY);
 
 export default function ProductPage() {
   const { slug } = useParams();
+  const [content, setContent] = useState(null);
   const [product, setProduct] = useState(null);
   const [symbols, setSymbols] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  const path = `/product/${slug}`;
+
   useEffect(() => {
-    async function fetchData() {
+    async function loadProductPage() {
+      setLoading(true);
       try {
-        setLoading(true);
-
-        const res = await fetch(
-          'https://hcan.dev.developer1.website/api/collections/products/entries'
-        );
-
-        if (!res.ok) throw new Error('Failed to fetch products');
-        const data = await res.json();
-        const products = data?.data || data?.entries || [];
-
-        // Find product by slug
-        const found = products.find(
-          (item) => item?.slug?.toLowerCase() === slug?.toLowerCase()
-        );
-
-        setProduct(found || null);
-
-        // Fetch Builder symbols (header/footer)
         const allSymbols = await builder.getAll('symbol', {
           fields: 'id,name,data',
           options: { noTargeting: true },
         });
         setSymbols(allSymbols);
+
+        // Then try fetching Builder page content
+        const builderContent = await builder
+          .get('products', {
+            userAttributes: { urlPath: path },
+          })
+          .toPromise();
+
+        setContent(builderContent);
+
+        //Fetch product data from Statamic API if Builder entry exists
+        const productId = builderContent?.data?.id;
+        console.log('Product ID from Builder:', productId);
+
+        if (productId) {
+          const res = await fetch(
+            `https://hcan.dev.developer1.website/api/collections/products/entries/${productId}`
+          );
+          const json = await res.json();
+          console.log('Statamic product data:', json);
+          setProduct(json.data);
+        }
       } catch (err) {
-        console.error('Error loading product:', err);
-        setProduct(null);
+        console.error('Error loading Builder page:', err);
       } finally {
         setLoading(false);
       }
     }
 
-    if (slug) fetchData();
-  }, [slug]);
+    if (slug) loadProductPage();
+  }, [path]);
 
-  // Loader while fetching data
-  if (loading) {
-    return <Loader />;
-  }
+  if (loading) return <Loader />;
 
-  // If product not found
+  // If no Builder product content or product data
   if (!product) {
     return (
       <>
+        {/* Header Symbol */}
         {symbols
-          .filter((s) => s.name === 'Header')
+          .filter((s) => s.name.toLowerCase() === 'header')
           .map((symbol) => (
             <BuilderComponent key={symbol.id} model='symbol' content={symbol} />
           ))}
+
         <Container className='py-5 text-center'>
           <h2>Product not found</h2>
           <p>No product exists with slug: {slug}</p>
         </Container>
+
+        {/* Footer Symbol */}
         {symbols
-          .filter((s) => s.name === 'footer')
+          .filter((s) => s.name.toLowerCase() === 'footer')
           .map((symbol) => (
             <BuilderComponent key={symbol.id} model='symbol' content={symbol} />
           ))}
       </>
     );
   }
-  const sanitizedProduct = Object.fromEntries(
-    Object.entries(product || {}).map(([key, val]) => {
-      if (val && typeof val === 'object' && 'value' in val) {
-        return [key, val.value];
-      }
-      return [key, val];
-    })
-  );
+
+  //Product found case
+
+   const sanitizedProduct = Object.fromEntries(
+     Object.entries(product || {}).map(([key, val]) => {
+       if (val && typeof val === 'object' && 'value' in val) {
+         return [key, val.value];
+       }
+       return [key, val];
+     })
+   );
 
   return (
     <>
       {/* Header Symbol */}
       {symbols
-        .filter((s) => s.name === 'Header')
+        .filter((s) => s.name.toLowerCase() === 'header')
         .map((symbol) => (
           <BuilderComponent key={symbol.id} model='symbol' content={symbol} />
         ))}
-
-      {/* Product Details */}
-      <Container fluid className='pdt-container py-5'>
-        <Row>
-          <Col md={6}>
-            <ProductSlider
-              thumbnail={sanitizedProduct?.product_main_image.permalink}
-              images={
-                sanitizedProduct?.product_images
-                  ?.slice(1)
-                  .map((img) => img.permalink) || []
-              }
-            />
-          </Col>
-
-          <Col md={6} className='pdt-details'>
-            <Card className='border-0 shadow-sm'>
-              <CardBody>
-                <h1 className='text-2xl font-bold mb-3'>
-                  {sanitizedProduct.title}
-                </h1>
-
-                <p className='text-lg mb-3'>
-                  {sanitizedProduct.description || ''}
-                </p>
-
-                {sanitizedProduct.model && (
-                  <p className='text-muted mb-1'>
-                    Model: {sanitizedProduct.model}
-                  </p>
-                )}
-
-                <StarRating
-                  rating={sanitizedProduct.rating || 0}
-                  reviews={sanitizedProduct.review || 0}
-                />
-
-                {sanitizedProduct.status && (
-                  <p className='mt-2 font-semibold text-green-600'>
-                    {sanitizedProduct.status}
-                  </p>
-                )}
-              </CardBody>
-            </Card>
-          </Col>
-        </Row>
-      </Container>
-
-      {/* Tabs Section */}
-      <TabSection product={sanitizedProduct} />
+      {content && (
+        <BuilderComponent
+          model='products'
+          content={content}
+          data={{ product: sanitizedProduct }}
+        />
+      )}
 
       {/* Footer Symbol */}
       {symbols
-        .filter((s) => s.name === 'footer')
+        .filter((s) => s.name.toLowerCase() === 'footer')
         .map((symbol) => (
           <BuilderComponent key={symbol.id} model='symbol' content={symbol} />
         ))}

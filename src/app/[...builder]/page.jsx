@@ -19,8 +19,7 @@ useEffect(() => {
     try {
       const contentRes = await builder
         .get('page', {
-          url: path, 
-          cachebust: true, 
+          url: path
         })
         .toPromise();
 
