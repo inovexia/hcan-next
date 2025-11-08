@@ -80,8 +80,6 @@ export default function ProductRegister() {
   //     setStatus('An error occurred during submission.');
   //   }
   // };
-
-
   if (loading) return <Loader />; 
   const evaluateCondition = (conditionObj) => {
     if (!conditionObj) return true;
