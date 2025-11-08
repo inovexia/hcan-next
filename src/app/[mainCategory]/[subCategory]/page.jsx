@@ -191,7 +191,9 @@ export default function SubCategoryPage({ params }) {
                         href={`/product/${product.slug}`}
                         className='d-inline-block mt-3'
                       >
-                        <Button color='secondary'>View Product</Button>
+                        <Button style={{ backgroundColor: '#00CCCC', color:'#fff', border:'none' }}>
+                          View Product
+                        </Button>
                       </Link>
                     </CardBody>
                   </Card>
