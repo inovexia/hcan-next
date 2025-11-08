@@ -8,6 +8,7 @@ export default function ProductRegister() {
   const [formData, setFormData] = useState({});
   const [status, setStatus] = useState(null);
   const [loading, setLoading] = useState(true);
+
   useEffect(() => {
     fetch('https://hcan.dev.developer1.website/api/forms/product_registration')
       .then((res) => res.json())
@@ -16,76 +17,114 @@ export default function ProductRegister() {
       .catch(() => setStatus('Failed to load form'));
   }, []);
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+  // Sanitize user input (remove HTML, JS, SQL injection, etc.)
+  const sanitizeInput = (value) => {
+    if (typeof value !== 'string') return value;
+    return value
+      .replace(/<[^>]*>?/gm, '') // remove HTML tags
+      .replace(/(script|alert|onerror|onload|<|>|{|}|;)/gi, '') // remove JS/script words
+      .replace(/['"`]/g, '') // remove quotes
+      .trim();
   };
 
+  // Handle field change (with sanitization)
+  const handleChange = (e) => {
+    const { name, value, type, files } = e.target;
+
+    // Handle file inputs separately
+    if (type === 'file') {
+      setFormData({ ...formData, [name]: files[0] });
+      return;
+    }
+
+    let sanitized = sanitizeInput(value);
+
+    // Allow only digits, + and spaces in phone fields
+    if (name.toLowerCase().includes('phone')) {
+      sanitized = sanitized.replace(/[^0-9+ ]/g, '');
+    }
+
+    setFormData({ ...formData, [name]: sanitized });
+  };
+
+  // Validate form before submission
+  const validateForm = () => {
+    for (const [key, value] of Object.entries(formData)) {
+      if (value instanceof File) continue; // skip files
+      if (typeof value === 'string') {
+        // Block scripts or SQL words
+        if (
+          /<|>|script|select|insert|delete|update|drop|union|--/i.test(value)
+        ) {
+          setStatus(`Suspicious input detected in field: ${key}`);
+          return false;
+        }
+      }
+    }
+
+    // Basic phone number validation
+    const phoneField = Object.keys(formData).find((k) =>
+      k.toLowerCase().includes('phone')
+    );
+    if (phoneField && formData[phoneField] && formData[phoneField].length < 7) {
+      setStatus('Please enter a valid phone number.');
+      return false;
+    }
+
+    return true;
+  };
+
+  // Secure form submit (handles both text + file)
   const handleSubmit = async (e) => {
     e.preventDefault();
     setStatus('Submitting...');
 
-    const response = await fetch(
-      'https://hcan.dev.developer1.website/forms/product_registration/submit',
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body:formData,
-      }
-    );
+    if (!validateForm()) return;
 
-    if (response.ok) {
-      setStatus('Thank you! Your product has been registered.');
-      setFormData({});
-    } else {
-      setStatus('Submission failed, please try again.');
+    try {
+      const hasFile = Object.values(formData).some((v) => v instanceof File);
+      let formPayload;
+
+      if (hasFile) {
+        formPayload = new FormData();
+        Object.entries(formData).forEach(([key, value]) => {
+          formPayload.append(key, value);
+        });
+      } else {
+        formPayload = JSON.stringify(formData);
+      }
+
+      // Dummy API
+      const apiUrl = 'https://jsonplaceholder.typicode.com/posts';
+
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: hasFile ? {} : { 'Content-Type': 'application/json' },
+        body: formPayload,
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        console.log('API Response:', result);
+        setStatus(
+          'Thank you! Your product has been registered.'
+        );
+        setFormData({});
+      } else {
+        setStatus('❌ Submission failed. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      setStatus('Error occurred during submission.');
     }
   };
 
-  // const handleSubmit = async (e) => {
-  //   e.preventDefault();
-  //   setStatus('Submitting...');
+  if (loading) return <Loader />;
 
-  //   try {
-  //     let formPayload;
-  //     const hasFile = Object.values(formData).some((v) => v instanceof File);
-
-  //     if (hasFile) {
-  //       formPayload = new FormData();
-  //       Object.entries(formData).forEach(([key, value]) => {
-  //         formPayload.append(key, value);
-  //       });
-  //     } else {
-  //       formPayload = JSON.stringify(formData);
-  //     }
-  //     const apiUrl = 'https://jsonplaceholder.typicode.com/posts';
-
-  //     const response = await fetch(apiUrl, {
-  //       method: 'POST',
-  //       headers: hasFile ? {} : { 'Content-Type': 'application/json' },
-  //       body: formPayload,
-  //     });
-
-  //     if (response.ok) {
-  //       const result = await response.json();
-  //       console.log('Dummy API Response:', result);
-  //       setStatus(
-  //         'Thank you! Your product has been registered (dummy API).'
-  //       );
-  //       setFormData({});
-  //     } else {
-  //       setStatus('Submission failed. Please try again.');
-  //     }
-  //   } catch (error) {
-  //     console.error('Error:', error);
-  //     setStatus('An error occurred during submission.');
-  //   }
-  // };
-  if (loading) return <Loader />; 
   const evaluateCondition = (conditionObj) => {
     if (!conditionObj) return true;
     return Object.entries(conditionObj).every(([depField, rule]) => {
       if (!rule) return true;
-
       const [operator, ...expectedParts] = rule.split(' ');
       const expectedValue = expectedParts.join(' ').trim().toLowerCase();
       const actualValue = (formData[depField] || '')
@@ -100,7 +139,7 @@ export default function ProductRegister() {
         case 'not':
         case '!=':
           return actualValue !== expectedValue;
-        case 'in': 
+        case 'in':
           return expectedValue
             .split(',')
             .map((v) => v.trim())
@@ -110,6 +149,7 @@ export default function ProductRegister() {
       }
     });
   };
+
   return (
     <Container className='w-100 py-5 border rounded-xl shadow'>
       <form
@@ -117,11 +157,16 @@ export default function ProductRegister() {
         className='mx-auto p-6'
         style={{ width: '90%' }}
       >
-        <input type="hidden" name="_token" value="cN03woeRj5Q0GtlOj7GydsZcRwlyp9VLzfpwDFJZ"/>
+        <input
+          type='hidden'
+          name='_token'
+          value='cN03woeRj5Q0GtlOj7GydsZcRwlyp9VLzfpwDFJZ'
+        />
         <Row className='pdt-register-form d-flex flex-wrap m-auto w-100 gx-4'>
           {Object.values(form.fields || {}).map((field) => {
             if (!evaluateCondition(field.if)) return null;
             const colSize = field.width === 50 ? 6 : 12;
+
             return (
               <Col md={colSize} key={field.handle} className='mb-4'>
                 <label className='block mb-1 font-medium'>
@@ -159,19 +204,33 @@ export default function ProductRegister() {
                       </option>
                     ))}
                   </select>
-                ) : field.type === 'file' ? (
-                  <input
-                    type='file'
-                    name={field.handle}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        [field.handle]: e.target.files[0],
-                      })
+                ) : field.type === 'file' || field.type === 'assets' ? (
+                  <div
+                    className='border border-dashed rounded p-4 text-center'
+                    style={{ borderColor: '#ccc', backgroundColor: '#f9f9f9' }}
+                    onClick={() =>
+                      document.getElementById(field.handle).click()
                     }
-                    className='w-100 border rounded p-2'
-                    required={field.validate?.includes('required')}
-                  />
+                  >
+                    <p className='mb-2 p-5'>Drag & Drop a File Here</p>
+                    <button type='button' className='btn btn-primary'>
+                      Upload File
+                    </button>
+                    <input
+                      id={field.handle}
+                      type='file'
+                      name={field.handle}
+                      accept='.jpg,.jpeg,.png,.pdf'
+                      style={{ display: 'none' }}
+                      onChange={handleChange}
+                      required={field.validate?.includes('required')}
+                    />
+                    {formData[field.handle] && (
+                      <p className='mt-2 text-sm text-success'>
+                        Selected: {formData[field.handle].name}
+                      </p>
+                    )}
+                  </div>
                 ) : field.type === 'checkbox' ? (
                   <label className='flex items-center space-x-2'>
                     <input
@@ -187,37 +246,6 @@ export default function ProductRegister() {
                     />
                     <span>{field.display}</span>
                   </label>
-                ) : field.type === 'assets' ? (
-                  <Col md={12} className='mb-4'>
-                    <div
-                      className='border border-dashed rounded p-4 text-center'
-                      style={{
-                        borderColor: '#ccc',
-                        backgroundColor: '#f9f9f9',
-                      }}
-                      onClick={() =>
-                        document.getElementById('receipt-upload').click()
-                      }
-                    >
-                      <p className='mb-2 p-5'>Drag & Drop a File Here</p>
-                      <button type='button' className='btn btn-primary'>
-                        Upload Receipt
-                      </button>
-                      <input
-                        id='receipt-upload'
-                        type='file'
-                        name='receipt'
-                        accept='.jpg,.jpeg,.png,.pdf'
-                        style={{ display: 'none' }}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            receipt: e.target.files[0],
-                          })
-                        }
-                      />
-                    </div>
-                  </Col>
                 ) : (
                   <input
                     type={field.input_type || field.type || 'text'}
@@ -231,6 +259,7 @@ export default function ProductRegister() {
               </Col>
             );
           })}
+
           <button
             type='submit'
             className='d-inline-block w-auto bg-transparent border-0 border-bottom border-black mx-auto'
@@ -239,7 +268,6 @@ export default function ProductRegister() {
             REGISTER
           </button>
         </Row>
-
         {status && <p className='mt-2 text-sm text-gray-700'>{status}</p>}
       </form>
     </Container>
