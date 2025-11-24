@@ -2,7 +2,7 @@
 import { builder, BuilderComponent } from '@builder.io/react';
 import { useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import Loader from '../../../components/Loader';
+import Loader from '../../../../components/Loader';
 
 builder.init(process.env.NEXT_PUBLIC_BUILDER_API_KEY);
 
