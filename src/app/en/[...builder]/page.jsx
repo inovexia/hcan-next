@@ -2,7 +2,7 @@
 import { builder, BuilderComponent } from '@builder.io/react';
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
-import Loader from '../../components/Loader';
+import Loader from '../../../components/Loader';
 
 builder.init(process.env.NEXT_PUBLIC_BUILDER_API_KEY);
 
@@ -21,11 +21,7 @@ useEffect(() => {
         .get('page', {
           url: path
         })
-        .toPromise();
-
-      console.log('Builder fetching path:', path);
-      console.log('Builder response:', contentRes);
-console.log('➡️ Builder route matched for path:', path);
+        .toPromise()
 
       setContent(contentRes);
     } catch (err) {

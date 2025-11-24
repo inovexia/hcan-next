@@ -3,10 +3,10 @@ import React, { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { builder, BuilderComponent } from '@builder.io/react';
 import { Container, Row, Col, Card, CardBody } from 'reactstrap';
-import Loader from '../../../components/Loader';
-import ProductSlider from '../../../components/Product/ProductSlider';
-import TabSection from '../../../components/Product/TabSection';
-import StarRating from '../../../components/Product/StarRating';
+import Loader from '../../../../components/Loader';
+import ProductSlider from '../../../../components/Product/ProductSlider';
+import TabSection from '../../../../components/Product/TabSection';
+import StarRating from '../../../../components/Product/StarRating';
 
 export default function ProductPage() {
   const { slug } = useParams();
@@ -14,13 +14,16 @@ export default function ProductPage() {
   const [symbols, setSymbols] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  const API_BASE = process.env.NEXT_PUBLIC_ST_API_BASE_URL;
+  const ENTRIES_ENDPOINT = process.env.NEXT_PUBLIC_ST_ENTRIES_ENDPOINT;
+
   useEffect(() => {
     async function fetchData() {
       try {
         setLoading(true);
 
         const res = await fetch(
-          'https://hcan.dev.developer1.website/api/collections/products/entries'
+          `${API_BASE}${ENTRIES_ENDPOINT}`
         );
 
         if (!res.ok) throw new Error('Failed to fetch products');

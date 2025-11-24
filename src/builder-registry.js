@@ -2,9 +2,11 @@
 import { builder, Builder } from "@builder.io/react";
 import Counter from "./components/Counter/Counter";
 import Loader from "./components/Loader";
-import Page from "./app/[...builder]/page";
+import PageEn from "./app/en/[...builder]/page";
+import PageFr from './app/fr/[...builder]/page';
 import ProductGrid from "./components/ProductGrid";
-import ProductPage from "./app/products/[slug]/page";
+import ProductPageEn from "./app/en/products/[slug]/page";
+import ProductPageFr from './app/fr/products/[slug]/page';
 import ProductRegister from "./components/Product/ProductRegister";
 import ProductSlider from "./components/Product/ProductSlider";
 import StatamicProduct from "./components/StatamicProduct";
@@ -30,8 +32,11 @@ Builder.registerComponent(ProductGrid, {
   name: "ProductGrid",
 });
 
-Builder.registerComponent(Page, {
+Builder.registerComponent(PageFr, {
   name: "Page",
+});
+Builder.registerComponent(PageEn, {
+  name: 'Page',
 });
 
 Builder.registerComponent(Loader, {
@@ -41,8 +46,11 @@ Builder.registerComponent(Loader, {
 Builder.registerComponent(Builder, {
   name: "Builder",
 });
+Builder.registerComponent(ProductPageEn, {
+  name: 'ProductPage',
+});
 
-Builder.registerComponent(ProductPage, {
+Builder.registerComponent(ProductPageFr, {
   name: "ProductPage",
 });
 
@@ -54,7 +62,7 @@ Builder.registerComponent(StatamicProduct, {
   name: "StatamicProduct",
 });
 
-Builder.registerComponent(ProductPage, {
+Builder.registerComponent(ProductPageEn, {
   name: "Product page",
   inputs: [
     {
@@ -62,6 +70,17 @@ Builder.registerComponent(ProductPage, {
       type: "text",
       defaultValue: "",
       helperText: "Dynamic product slug",
+    },
+  ],
+});
+Builder.registerComponent(ProductPageFr, {
+  name: 'Product page',
+  inputs: [
+    {
+      name: 'slug',
+      type: 'text',
+      defaultValue: '',
+      helperText: 'Dynamic product slug',
     },
   ],
 });

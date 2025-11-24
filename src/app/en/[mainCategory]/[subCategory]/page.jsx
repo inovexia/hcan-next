@@ -2,10 +2,14 @@
 import React, { use, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Container, Row, Col, Card, CardBody, Button } from 'reactstrap';
-import BuilderLayout from '../../../components/BuilderLayout';
-import Loader from '../../../components/Loader';
+import BuilderLayout from '../../../../components/BuilderLayout';
+import Loader from '../../../../components/Loader';
 
 export default function SubCategoryPage({ params }) {
+
+  const API_BASE = process.env.NEXT_PUBLIC_ST_API_BASE_URL;
+  const ENTRIES_ENDPOINT = process.env.NEXT_PUBLIC_ST_ENTRIES_ENDPOINT;
+
   const resolvedParams = use(params);
   const [loading, setLoading] = useState(true);
   const [products, setProducts] = useState([]);
@@ -26,10 +30,9 @@ export default function SubCategoryPage({ params }) {
     async function fetchData() {
       setLoading(true);
       try {
-        const res = await fetch(
-          'https://hcan.dev.developer1.website/api/collections/products/entries',
-          { cache: 'no-store' }
-        );
+        const res = await fetch(`${API_BASE}${ENTRIES_ENDPOINT}`, {
+          cache: 'no-store',
+        });
 
         if (!res.ok) throw new Error('Failed to fetch data');
 
@@ -188,7 +191,7 @@ export default function SubCategoryPage({ params }) {
                       )}
 
                       <Link
-                        href={`/product/${product.slug}`}
+                        href={`/en/product/${product.slug}`}
                         className='d-inline-block mt-3'
                       >
                         <Button style={{ backgroundColor: '#00CCCC', color:'#fff', border:'none' }}>

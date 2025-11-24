@@ -4,11 +4,13 @@ import { useEffect, useState } from 'react';
 
 export default function ProductGrid({ heading = 'All Products' }) {
   const [products, setProducts] = useState([]);
+  const API_BASE = process.env.NEXT_PUBLIC_ST_API_BASE_URL;
+  const ENTRIES_ENDPOINT = process.env.NEXT_PUBLIC_ST_ENTRIES_ENDPOINT;
 
   useEffect(() => {
     async function fetchProducts() {
       const res = await fetch(
-        'https://hcan.dev.developer1.website/api/collections/products/entries'
+        `${API_BASE}${ENTRIES_ENDPOINT}`
       );
       const data = await res.json();
       setProducts(data.data);

@@ -3,12 +3,14 @@ import React, { useEffect, useState } from 'react';
 
 export default function StatamicProduct({ slug }) {
   const [product, setProduct] = useState(null);
+  const API_BASE = process.env.NEXT_PUBLIC_ST_API_BASE_URL;
+  const ENTRIES_ENDPOINT = process.env.NEXT_PUBLIC_ST_ENTRIES_ENDPOINT;
 
   useEffect(() => {
     if (!slug) return;
 
     fetch(
-      `https://hcan.dev.developer1.website/api/collections/products/entries/${slug}`
+      `${API_BASE}${ENTRIES_ENDPOINT}${slug}`
     )
       .then((res) => res.json())
       .then((data) => setProduct(data.data))

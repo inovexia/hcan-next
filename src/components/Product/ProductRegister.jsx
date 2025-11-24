@@ -8,30 +8,35 @@ export default function ProductRegister() {
   const [formData, setFormData] = useState({});
   const [status, setStatus] = useState(null);
   const [loading, setLoading] = useState(true);
+  const API_BASE = process.env.NEXT_PUBLIC_ST_API_BASE_URL;
+  const FORM_ENDPOINT = process.env.NEXT_PUBLIC_ST_FORM_ENDPOINT;
+  const SUBMIT_ENDPOINT = process.env.NEXT_PUBLIC_ST_FORM_SUBMIT;
+
+  console.log('API NAME', API_BASE);
+
+  console.log('API NAME',API_BASE);
 
   useEffect(() => {
-    fetch('https://hcan.dev.developer1.website/api/forms/product_registration')
+    fetch(`${API_BASE}${FORM_ENDPOINT}`)
       .then((res) => res.json())
       .then((data) => setForm(data.data))
       .then(() => setLoading(false))
       .catch(() => setStatus('Failed to load form'));
   }, []);
 
-  // Sanitize user input (remove HTML, JS, SQL injection, etc.)
+
   const sanitizeInput = (value) => {
     if (typeof value !== 'string') return value;
     return value
-      .replace(/<[^>]*>?/gm, '') // remove HTML tags
-      .replace(/(script|alert|onerror|onload|<|>|{|}|;)/gi, '') // remove JS/script words
-      .replace(/['"`]/g, '') // remove quotes
+      .replace(/<[^>]*>?/gm, '')
+      .replace(/(script|alert|onerror|onload|<|>|{|}|;)/gi, '')
+      .replace(/['"`]/g, '')
       .trim();
   };
 
-  // Handle field change (with sanitization)
   const handleChange = (e) => {
     const { name, value, type, files } = e.target;
 
-    // Handle file inputs separately
     if (type === 'file') {
       setFormData({ ...formData, [name]: files[0] });
       return;
@@ -39,7 +44,6 @@ export default function ProductRegister() {
 
     let sanitized = sanitizeInput(value);
 
-    // Allow only digits, + and spaces in phone fields
     if (name.toLowerCase().includes('phone')) {
       sanitized = sanitized.replace(/[^0-9+ ]/g, '');
     }
@@ -47,12 +51,11 @@ export default function ProductRegister() {
     setFormData({ ...formData, [name]: sanitized });
   };
 
-  // Validate form before submission
   const validateForm = () => {
     for (const [key, value] of Object.entries(formData)) {
-      if (value instanceof File) continue; // skip files
+      if (value instanceof File) continue;
+
       if (typeof value === 'string') {
-        // Block scripts or SQL words
         if (
           /<|>|script|select|insert|delete|update|drop|union|--/i.test(value)
         ) {
@@ -62,10 +65,10 @@ export default function ProductRegister() {
       }
     }
 
-    // Basic phone number validation
     const phoneField = Object.keys(formData).find((k) =>
       k.toLowerCase().includes('phone')
     );
+
     if (phoneField && formData[phoneField] && formData[phoneField].length < 7) {
       setStatus('Please enter a valid phone number.');
       return false;
@@ -74,7 +77,6 @@ export default function ProductRegister() {
     return true;
   };
 
-  // Secure form submit (handles both text + file)
   const handleSubmit = async (e) => {
     e.preventDefault();
     setStatus('Submitting...');
@@ -82,55 +84,50 @@ export default function ProductRegister() {
     if (!validateForm()) return;
 
     try {
-      const hasFile = Object.values(formData).some((v) => v instanceof File);
-      let formPayload;
+      const formPayload = new FormData();
+      Object.entries(formData).forEach(([key, value]) => {
+        formPayload.append(key, value);
+      });
 
-      if (hasFile) {
-        formPayload = new FormData();
-        Object.entries(formData).forEach(([key, value]) => {
-          formPayload.append(key, value);
-        });
-      } else {
-        formPayload = JSON.stringify(formData);
-      }
-
-      // Dummy API
-      const apiUrl = 'https://jsonplaceholder.typicode.com/posts';
-
-      const response = await fetch(apiUrl, {
+      const response = await fetch(`${API_BASE}${SUBMIT_ENDPOINT}`, {
         method: 'POST',
-        headers: hasFile ? {} : { 'Content-Type': 'application/json' },
+        headers: { Accept: 'application/json' },
         body: formPayload,
       });
 
+      // Statamic returns 200 on success (even if browser blocks body)
       if (response.ok) {
-        const result = await response.json();
-        console.log('API Response:', result);
-        setStatus(
-          'Thank you! Your product has been registered.'
-        );
-        setFormData({});
-      } else {
-        setStatus('❌ Submission failed. Please try again.');
+        setStatus('Thank you! Your product has been registered.');
+        return;
       }
+
+      // CORS-blocked success (status=0 or opaque)
+      if (response.type === 'opaque' || response.status === 0) {
+        setStatus('Thank you! Your product has been registered.');
+        return;
+      }
+
+      // Actual failure
+      setStatus('Submission failed. Please try again.');
     } catch (error) {
-      console.error('Error:', error);
-      setStatus('Error occurred during submission.');
+      console.error(error);
+      setStatus('Submission failed. Please try again.');
     }
   };
+
+
 
   if (loading) return <Loader />;
 
   const evaluateCondition = (conditionObj) => {
     if (!conditionObj) return true;
+
     return Object.entries(conditionObj).every(([depField, rule]) => {
       if (!rule) return true;
+
       const [operator, ...expectedParts] = rule.split(' ');
-      const expectedValue = expectedParts.join(' ').trim().toLowerCase();
-      const actualValue = (formData[depField] || '')
-        .toString()
-        .toLowerCase()
-        .trim();
+      const expectedValue = expectedParts.join(' ').toLowerCase().trim();
+      const actualValue = (formData[depField] || '').toString().toLowerCase();
 
       switch (operator) {
         case 'equals':
@@ -157,14 +154,10 @@ export default function ProductRegister() {
         className='mx-auto p-6'
         style={{ width: '90%' }}
       >
-        <input
-          type='hidden'
-          name='_token'
-          value='cN03woeRj5Q0GtlOj7GydsZcRwlyp9VLzfpwDFJZ'
-        />
         <Row className='pdt-register-form d-flex flex-wrap m-auto w-100 gx-4'>
           {Object.values(form.fields || {}).map((field) => {
             if (!evaluateCondition(field.if)) return null;
+
             const colSize = field.width === 50 ? 6 : 12;
 
             return (
@@ -207,7 +200,6 @@ export default function ProductRegister() {
                 ) : field.type === 'file' || field.type === 'assets' ? (
                   <div
                     className='border border-dashed rounded p-4 text-center'
-                    style={{ borderColor: '#ccc', backgroundColor: '#f9f9f9' }}
                     onClick={() =>
                       document.getElementById(field.handle).click()
                     }
@@ -268,6 +260,7 @@ export default function ProductRegister() {
             REGISTER
           </button>
         </Row>
+
         {status && <p className='mt-2 text-sm text-gray-700'>{status}</p>}
       </form>
     </Container>

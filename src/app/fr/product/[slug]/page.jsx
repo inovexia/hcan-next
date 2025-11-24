@@ -3,8 +3,8 @@ import { builder, BuilderComponent } from '@builder.io/react';
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { Container } from 'reactstrap';
-import Loader from '../../../components/Loader';
-import ProductSlider from '../../../components/Product/ProductSlider';
+import Loader from '../../../../components/Loader';
+import ProductSlider from '../../../../components/Product/ProductSlider';
 
 builder.init(process.env.NEXT_PUBLIC_BUILDER_API_KEY);
 
@@ -15,7 +15,10 @@ export default function ProductPage() {
   const [symbols, setSymbols] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const path = `/product/${slug}`;
+  const API_BASE = process.env.NEXT_PUBLIC_ST_API_BASE_URL;
+  const ENTRIES_ENDPOINT = process.env.NEXT_PUBLIC_ST_ENTRIES_ENDPOINT;
+
+  const path = `/fr/product/${slug}`;
 
   useEffect(() => {
     async function loadProductPage() {
@@ -29,7 +32,7 @@ export default function ProductPage() {
 
         // Then try fetching Builder page content
         const builderContent = await builder
-          .get('products', {
+          .get('products-french', {
             userAttributes: { urlPath: path },
           })
           .toPromise();
@@ -38,14 +41,12 @@ export default function ProductPage() {
 
         //Fetch product data from Statamic API if Builder entry exists
         const productId = builderContent?.data?.id;
-        console.log('Product ID from Builder:', productId);
 
         if (productId) {
           const res = await fetch(
-            `https://hcan.dev.developer1.website/api/collections/products/entries/${productId}`
+            `${API_BASE}${ENTRIES_ENDPOINT}/${productId}`
           );
           const json = await res.json();
-          console.log('Statamic product data:', json);
           setProduct(json.data);
         }
       } catch (err) {
@@ -66,7 +67,7 @@ export default function ProductPage() {
       <>
         {/* Header Symbol */}
         {symbols
-          .filter((s) => s.name.toLowerCase() === 'header')
+          .filter((s) => s.name.toLowerCase() === 'header-fr')
           .map((symbol) => (
             <BuilderComponent key={symbol.id} model='symbol' content={symbol} />
           ))}
@@ -88,26 +89,26 @@ export default function ProductPage() {
 
   //Product found case
 
-   const sanitizedProduct = Object.fromEntries(
-     Object.entries(product || {}).map(([key, val]) => {
-       if (val && typeof val === 'object' && 'value' in val) {
-         return [key, val.value];
-       }
-       return [key, val];
-     })
-   );
+  const sanitizedProduct = Object.fromEntries(
+    Object.entries(product || {}).map(([key, val]) => {
+      if (val && typeof val === 'object' && 'value' in val) {
+        return [key, val.value];
+      }
+      return [key, val];
+    })
+  );
 
   return (
     <>
       {/* Header Symbol */}
       {symbols
-        .filter((s) => s.name.toLowerCase() === 'header')
+        .filter((s) => s.name.toLowerCase() === 'header-fr')
         .map((symbol) => (
           <BuilderComponent key={symbol.id} model='symbol' content={symbol} />
         ))}
       {content && (
         <BuilderComponent
-          model='products'
+          model='products-french'
           content={content}
           data={{ product: sanitizedProduct }}
         />
