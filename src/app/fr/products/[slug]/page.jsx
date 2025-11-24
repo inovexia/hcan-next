@@ -64,7 +64,7 @@ export default function ProductPage() {
     return (
       <>
         {symbols
-          .filter((s) => s.name === 'Header')
+          .filter((s) => s.name === 'Header-fr')
           .map((symbol) => (
             <BuilderComponent key={symbol.id} model='symbol' content={symbol} />
           ))}
@@ -73,7 +73,7 @@ export default function ProductPage() {
           <p>No product exists with slug: {slug}</p>
         </Container>
         {symbols
-          .filter((s) => s.name === 'footer')
+          .filter((s) => s.name === 'footer-french')
           .map((symbol) => (
             <BuilderComponent key={symbol.id} model='symbol' content={symbol} />
           ))}
@@ -94,7 +94,7 @@ console.log('Sanitized product data passed to Builder:', sanitizedProduct);
     <>
       {/* Header Symbol */}
       {symbols
-        .filter((s) => s.name === 'Header')
+        .filter((s) => s.name === 'Header-fr')
         .map((symbol) => (
           <BuilderComponent key={symbol.id} model='symbol' content={symbol} />
         ))}
@@ -151,7 +151,7 @@ console.log('Sanitized product data passed to Builder:', sanitizedProduct);
 
       {/* Footer Symbol */}
       {symbols
-        .filter((s) => s.name === 'footer')
+        .filter((s) => s.name === 'footer-french')
         .map((symbol) => (
           <BuilderComponent key={symbol.id} model='symbol' content={symbol} />
         ))}

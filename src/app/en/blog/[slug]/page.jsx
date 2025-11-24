@@ -34,9 +34,6 @@ export default function BlogDetailPage() {
           })
           .toPromise();
 
-        console.log('Fetching blog for:', path);
-        console.log('Builder result:', result);
-
         setContent(result);
       } catch (err) {
         console.error('Builder fetch error:', err);

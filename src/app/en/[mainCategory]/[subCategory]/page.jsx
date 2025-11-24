@@ -26,6 +26,13 @@ export default function SubCategoryPage({ params }) {
     'C1 Series',
   ];
 
+   function removeDuplicates(arr) {
+     const map = new Map();
+     arr.forEach((item) => {
+       map.set(item.product_slug, item);
+     });
+     return Array.from(map.values());
+   }
   useEffect(() => {
     async function fetchData() {
       setLoading(true);
@@ -48,8 +55,10 @@ export default function SubCategoryPage({ params }) {
               resolvedParams.subCategory?.toLowerCase()
         );
 
-        setProducts(matched);
-        setFilteredProducts(matched);
+        const uniqueMatched = removeDuplicates(matched);
+
+        setProducts(uniqueMatched);
+        setFilteredProducts(uniqueMatched);
 
         // Extract all unique series names from API
         const extractedSeries = Array.from(
@@ -159,7 +168,7 @@ export default function SubCategoryPage({ params }) {
           <Col xs='12' sm='12' md='9' lg='9'>
             <Row className='gy-4'>
               {filteredProducts.map((product) => (
-                <Col xs='12' sm='6' md='4' lg='4' key={product.slug}>
+                <Col xs='12' sm='6' md='4' lg='4' key={product.product_slug}>
                   <Card className='shadow-sm h-100'>
                     <CardBody className='text-center'>
                       <img
@@ -191,10 +200,16 @@ export default function SubCategoryPage({ params }) {
                       )}
 
                       <Link
-                        href={`/en/product/${product.slug}`}
+                        href={`/en/product/${product.product_slug}`}
                         className='d-inline-block mt-3'
                       >
-                        <Button style={{ backgroundColor: '#00CCCC', color:'#fff', border:'none' }}>
+                        <Button
+                          style={{
+                            backgroundColor: '#00CCCC',
+                            color: '#fff',
+                            border: 'none',
+                          }}
+                        >
                           View Product
                         </Button>
                       </Link>

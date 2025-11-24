@@ -94,7 +94,7 @@ console.log('Sanitized product data passed to Builder:', sanitizedProduct);
     <>
       {/* Header Symbol */}
       {symbols
-        .filter((s) => s.name === 'Header')
+        .filter((s) => s.name === 'Header-fr')
         .map((symbol) => (
           <BuilderComponent key={symbol.id} model='symbol' content={symbol} />
         ))}

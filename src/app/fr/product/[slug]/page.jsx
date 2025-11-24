@@ -79,7 +79,7 @@ export default function ProductPage() {
 
         {/* Footer Symbol */}
         {symbols
-          .filter((s) => s.name.toLowerCase() === 'footer')
+          .filter((s) => s.name.toLowerCase() === 'footer-french')
           .map((symbol) => (
             <BuilderComponent key={symbol.id} model='symbol' content={symbol} />
           ))}
@@ -116,7 +116,7 @@ export default function ProductPage() {
 
       {/* Footer Symbol */}
       {symbols
-        .filter((s) => s.name.toLowerCase() === 'footer')
+        .filter((s) => s.name.toLowerCase() === 'footer-french')
         .map((symbol) => (
           <BuilderComponent key={symbol.id} model='symbol' content={symbol} />
         ))}

@@ -23,10 +23,6 @@ export default function BuilderCatchAllPage() {
           })
           .toPromise();
 
-        console.log('Builder fetching path:', path);
-        console.log('Builder response:', contentRes);
-        console.log('Builder route matched for path:', path);
-
         setContent(contentRes);
       } catch (err) {
         console.error('Builder fetch error:', err);
