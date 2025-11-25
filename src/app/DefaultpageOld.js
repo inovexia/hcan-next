@@ -70,8 +70,8 @@ export default function Home() {
           >
             <Image
               className={styles.logo}
-              src='/vercel.svg'
-              alt='Vercel logomark'
+              src='/Hisense-fav.png'
+              alt='VHisence'
               width={20}
               height={20}
             />

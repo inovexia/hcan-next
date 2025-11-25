@@ -12,7 +12,6 @@ export default function BuilderCatchAllPage() {
 
   const [content, setContent] = useState(null);
   const [loading, setLoading] = useState(true);
-
   useEffect(() => {
     async function fetchContent() {
       setLoading(true);
