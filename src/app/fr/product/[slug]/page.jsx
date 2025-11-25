@@ -98,6 +98,8 @@ export default function ProductPage() {
     })
   );
 
+  console.log(sanitizedProduct);
+
   return (
     <>
       {/* Header Symbol */}
