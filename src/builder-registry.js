@@ -1,5 +1,6 @@
 "use client";
 import { builder, Builder } from "@builder.io/react";
+import BannerSlider from "./components/BannerSlider";
 import Counter from "./components/Counter/Counter";
 import LanguageSwitcher from "./components/LanguageSwitcher";
 import Loader from "./components/Loader";
@@ -103,4 +104,37 @@ Builder.registerComponent(ProductSlider, {
 
 Builder.registerComponent(LanguageSwitcher, {
   name: "LanguageSwitcher",
+});
+
+Builder.registerComponent(BannerSlider, {
+  name: 'Banner Slider',
+  inputs: [
+    {
+      name: 'slides',
+      type: 'list',
+      defaultValue: [],
+      subFields: [
+        {
+          name: 'image',
+          type: 'file',
+          allowedFileTypes: ['jpeg', 'png', 'webp'],
+        },
+        { name: 'title', type: 'text' },
+        { name: 'subtitle', type: 'text' },
+        { name: 'buttonText', type: 'text' },
+        { name: 'buttonLink', type: 'url' },
+      ],
+    },
+    {
+      name: 'showArrows',
+      type: 'boolean',
+      defaultValue: true,
+      friendlyName: 'Show Arrows (Next / Prev)',
+    },
+  ],
+});
+
+
+Builder.registerComponent(BannerSlider, {
+  name: "BannerSlider",
 });
