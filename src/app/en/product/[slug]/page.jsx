@@ -62,6 +62,8 @@ export default function ProductPage() {
     if (slug) loadProductPage();
   }, [path]);
 
+  console.log(symbols);
+
   if (loading) return <Loader />;
 
   // If no Builder product content or product data

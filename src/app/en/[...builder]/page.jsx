@@ -8,7 +8,7 @@ builder.init(process.env.NEXT_PUBLIC_BUILDER_API_KEY);
 
 export default function BuilderCatchAllPage() {
   const params = useParams();
-  const path = '/' + (params?.builder?.join('/') || '');
+  const path = '/en/' + (params?.builder?.join('/') || '');
 
   const [content, setContent] = useState(null);
   const [loading, setLoading] = useState(true);
